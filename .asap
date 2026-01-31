@@ -1,0 +1,8 @@
+target=asapcpp
+compiler=clang++
+compiler.flags=-Wall -Wextra -Werror -std=c++17 -fsanitize=address -fsanitize=undefined -I./lib
+compiler.flags.prod=-Wall -Wextra -Werror -std=c++17 -O2
+compiler.flags.debug=-Wall -Wextra -Werror -std=c++17 -g3 -O0 -I./lib
+linker.flags=-fsanitize=address -fsanitize=undefined
+linker.flags.prod=-O2
+tidy.checks=performance-*,bugprone-use-after-move,bugprone-argument-comment,bugprone-dangling-handle,modernize-use-auto,modernize-use-override,modernize-use-using,modernize-make-unique,modernize-make-shared,misc-redundant-expression,readability-redundant-declaration
