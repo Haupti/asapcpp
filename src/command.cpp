@@ -188,9 +188,9 @@ void command_include(std::vector<std::string> args) {
   asap_conf_write(&conf);
 }
 
-void command_tidy(std::vector<std::string> args) {
+void command_check(std::vector<std::string> args) {
   if (args.size() != 0) {
-    fail("'tidy' expects no arguments");
+    fail("'check' expects no arguments");
   }
   asap_conf conf = asap_conf_load();
   process_result which_pkg_config = process_run("which clang-tidy");
@@ -203,4 +203,10 @@ void command_tidy(std::vector<std::string> args) {
   string command = "clang-tidy --checks=\"" + conf.tidy_checks + "\" " +
                    join(src_files, " ");
   process_exec(command.c_str());
+}
+void command_clean(vector<std::string> args) {
+  if (args.size() != 0) {
+    fail("'clean' expects no arguments");
+  }
+  cleanup_build_dir();
 }

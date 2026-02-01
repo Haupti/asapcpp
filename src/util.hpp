@@ -23,7 +23,7 @@ inline void info(const std::string &msg) {
 }
 
 // error and user error
-inline void fail(const std::string &msg) {
+inline void fail [[noreturn]] (const std::string &msg) {
   println(ASNI_RED + msg + ASNI_RESET);
   exit(1);
 }
@@ -38,4 +38,4 @@ std::string read_file(const std::string &filepath);
 // string utilities
 bool ends_with(const std::string &str, const std::string &suffix);
 bool starts_with(const std::string &str, const std::string &prefix);
-std::string join(const std::vector<std::string> & list, std::string delim);
+std::string join(const std::vector<std::string> &list, std::string delim);

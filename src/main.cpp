@@ -5,12 +5,13 @@
 void show_help() {
   println("Usage: asapc <command> [args...]");
   println("Commands:\n");
-  println("  new  <name>        - creates a new cpp project");
+  println("  new <name>         - creates a new cpp project");
   println("  build              - optimized build");
   println("  run [args]         - default build and run.");
+  println("  clean              - cleanup build directory");
   println("  test               - runs the tests");
   println("  include <lib-name> - include dependency via pkg-config");
-  println("  tidy               - runs clang-tidy");
+  println("  check              - runs clang-tidy on all files in src");
   println("  help|-h|--help     - shows this");
 }
 
@@ -39,8 +40,10 @@ int main(int args, char **argv) {
     command_build(arguments);
   } else if (command == "include") {
     command_include(arguments);
-  } else if (command == "tidy") {
-    command_tidy(arguments);
+  } else if (command == "check") {
+    command_check(arguments);
+  } else if (command == "clean") {
+    command_clean(arguments);
   } else {
     fail("unkown command '" + command + "'");
   }
