@@ -78,11 +78,10 @@ void command_test(vector<string> args) {
       test_files.push_back(dir_entry.path());
     }
   }
-  cout << "test files found: " << test_files.size() << endl;
 
   // compile src, lib and testutil files
   for (auto file : files) {
-    compile_file_default(&conf, file, use_ccache);
+    compile_file_default(&conf, file, use_ccache, false);
   }
 
   // gather src, lib and testutil object files
@@ -96,10 +95,11 @@ void command_test(vector<string> args) {
 
   // compile, link and run test file + object files
   for (auto test : test_files) {
-    string test_object_file = compile_file_default(&conf, test, use_ccache);
+    string test_object_file =
+        compile_file_default(&conf, test, use_ccache, true);
 
     link_files_default(&conf, object_files_string + " " + test_object_file,
-                       "build/testexe");
+                       "build/testexe", true);
 
     string evaluate_command = "./build/testexe";
     process_exec(evaluate_command.c_str());

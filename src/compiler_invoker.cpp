@@ -14,7 +14,7 @@ std::string to_build_object_filepath(std::string filename) {
 }
 
 std::string compile_file_default(asap_config *conf, std::string filename,
-                                 bool use_ccache) {
+                                 bool use_ccache, bool silent = false) {
   assert(conf);
   std::string compile_command;
   if (use_ccache) {
@@ -24,19 +24,24 @@ std::string compile_file_default(asap_config *conf, std::string filename,
   compile_command += conf->compiler_name + " -c " +
                      conf->compiler_flags_default + " " + filename + " -o " +
                      object_file_path;
-  info("Compiling " + filename + "...");
+  if (!silent) {
+    info("Compiling " + filename + "...");
+  }
   process_exec(compile_command.c_str());
   return object_file_path;
 }
 
 void link_files_default(
     asap_config *conf, std::string object_files_str,
-    std::string output_filename = "___use_conf_target_name___") {
+    std::string output_filename = "___use_conf_target_name___",
+    bool silent = false) {
   assert(conf);
   if (output_filename == "___use_conf_target_name___") {
     output_filename = conf->target_name;
   }
-  info("Linking...");
+  if (!silent) {
+    info("Linking...");
+  }
   std::string link_command = conf->compiler_name + " " +
                              conf->linker_flags_default + " " +
                              object_files_str + " " + " -o " + output_filename;
