@@ -12,10 +12,8 @@ namespace {
 void cleanup_build_dir() {
   if (filesystem::exists("build")) {
     filesystem::remove_all("build");
-    filesystem::create_directory("build");
-  } else {
-    filesystem::create_directory("build");
   }
+  filesystem::create_directories("build/.obj");
 }
 
 bool has_ccache_and_warn() {
@@ -71,15 +69,15 @@ void command_new(vector<string> args) {
   write_file(args[0] + "/lib/asap/t.hpp", T_HEADER_FILE_CONTENT);
   write_file(args[0] + "/lib/asap/stopwatch.hpp",
              STOPWATCH_HEADER_FILE_CONTENT);
-  asap_config conf;
-  asap_config_write(conf, args[0] + "/.asap");
+  asap_conf conf;
+  asap_conf_write(&conf, args[0] + "/.asap");
 }
 
 void command_test(vector<string> args) {
   if (args.size() != 0) {
     fail("'test' expects no arguments");
   }
-  asap_config conf = asap_config_load();
+  asap_conf conf = asap_conf_load();
   cleanup_build_dir();
   bool use_ccache = has_ccache_and_warn();
 
@@ -117,7 +115,7 @@ void command_test(vector<string> args) {
 }
 
 void command_run(vector<string> args) {
-  asap_config conf = asap_config_load();
+  asap_conf conf = asap_conf_load();
   cleanup_build_dir();
   bool use_ccache = has_ccache_and_warn();
 
@@ -138,4 +136,51 @@ void command_run(vector<string> args) {
   }
   info("Running '" + evaluate_command + "'...");
   process_exec(evaluate_command.c_str());
+}
+
+void command_build(std::vector<std::string> args) {
+  if (args.size() != 1) {
+    fail("'include' expects exactly 1 argument");
+  }
+  asap_conf conf = asap_conf_load();
+  cleanup_build_dir();
+  bool use_ccache = has_ccache_and_warn();
+
+  vector<string> src_files = find_cpp_files_in({"src", "lib"}, true);
+  for (auto file : src_files) {
+    compile_file_production(&conf, file, use_ccache, false);
+  }
+
+  string object_files_string = find_object_files_string();
+  string output_file = "build/" + conf.target_name;
+  link_files_production(&conf, object_files_string, output_file, false);
+  string evaluate_command = "./" + output_file + " " + join(args, " ");
+}
+void command_include(std::vector<std::string> args) {
+  asap_conf conf = asap_conf_load();
+  process_result which_pkg_config = process_run("which pkg-config");
+  if (which_pkg_config.status != 0) {
+    fail("'pkg-config' not found.");
+  }
+
+  string lib = args[0];
+  string linker_flags_command = "pkg-cofig --libs " + lib;
+  process_result linker_flags_result =
+      process_run(linker_flags_command.c_str());
+  if (linker_flags_result.status != 0) {
+    fail("failed to find linker flags for '" + lib + "'");
+  }
+
+  string compiler_flags_command = "pkg-cofig --cflags " + lib;
+  process_result compiler_flags_result =
+      process_run(compiler_flags_command.c_str());
+  if (compiler_flags_result.status != 0) {
+    fail("failed to find compiler flags for '" + lib + "'");
+  }
+
+  conf._lib_compiler_flags[lib + ".compiler.flags"] =
+      compiler_flags_result.stdoutput;
+  conf._lib_linker_flags[lib + ".linker.flags"] = linker_flags_result.stdoutput;
+
+  asap_conf_write(&conf);
 }

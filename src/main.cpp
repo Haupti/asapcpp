@@ -11,6 +11,7 @@ int main(int args, char **argv) {
     println("  run [args]         - default build and run.");
     println("  test               - runs the tests");
     println("  include <lib-name> - include dependency via pkg-config");
+    println("  tidy               - runs clang-tidy");
   }
 
   std::string command = argv[1];
@@ -26,6 +27,12 @@ int main(int args, char **argv) {
     command_test(arguments);
   } else if (command == "run") {
     command_run(arguments);
+  } else if (command == "build") {
+    command_build(arguments);
+  } else if (command == "include") {
+    command_include(arguments);
+  } else if (command == "tidy") {
+    fail("not yet implemented");
   } else {
     fail("unkown command '" + command + "'");
   }
