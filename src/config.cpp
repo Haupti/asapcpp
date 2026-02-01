@@ -13,10 +13,11 @@ asap_config asap_config_load() {
     if (content[i] == '\n' || i + 1 == content.size()) {
       size_t eq_pos = content.find("=", start);
       if (eq_pos == string::npos) {
-        fail(".asap parsing failed at '" + content.substr(start, i) + "'");
+        fail(".asap parsing failed at '" + content.substr(start, i - start) +
+             "'");
       }
-      string key = content.substr(start, eq_pos);
-      string value = content.substr(eq_pos + 1, i);
+      string key = content.substr(start, eq_pos - start);
+      string value = content.substr(eq_pos + 1, i - eq_pos - 1);
       start = i + 1;
 
       if (key == "compiler.name") {

@@ -8,6 +8,16 @@
 #include <vector>
 using namespace std;
 
+namespace {
+void cleanup_build_dir() {
+  if (filesystem::exists("build")) {
+    filesystem::remove_all("build");
+    filesystem::create_directory("build");
+  } else {
+    filesystem::create_directory("build");
+  }
+}
+} // namespace
 void command_new(vector<string> args) {
   if (args.size() != 1) {
     fail("'new' expects exactly 1 argument");
@@ -31,6 +41,7 @@ void command_test(vector<string> args) {
     fail("'test' expects no arguments");
   }
   asap_config conf = asap_config_load();
+  cleanup_build_dir();
 
   // check for ccache
   bool use_ccache = false;
@@ -47,28 +58,27 @@ void command_test(vector<string> args) {
   vector<string> test_files;
   vector<string> files;
   for (auto dir_entry : filesystem::recursive_directory_iterator("src")) {
-    string path = dir_entry.path();
-    if (path == "main.cpp") {
-      continue;
-    }
-    if (ends_with(path, ".cpp")) {
+    string filename = dir_entry.path().filename();
+    if (ends_with(filename, ".cpp") && filename != "main.cpp") {
       files.push_back(dir_entry.path());
     }
   }
   for (auto dir_entry : filesystem::recursive_directory_iterator("lib")) {
-    if (ends_with(dir_entry.path(), ".cpp")) {
+    string filename = dir_entry.path().filename();
+    if (ends_with(filename, ".cpp")) {
       files.push_back(dir_entry.path());
     }
   }
+
   for (auto dir_entry : filesystem::recursive_directory_iterator("tests")) {
-    if (starts_with(dir_entry.path(), "testutil_") &&
-        ends_with(dir_entry.path(), ".cpp")) {
+    string filename = dir_entry.path().filename();
+    if (starts_with(filename, "testutil_") && ends_with(filename, ".cpp")) {
       files.push_back(dir_entry.path());
-    } else if (starts_with(dir_entry.path(), "test_") &&
-               ends_with(dir_entry.path(), ".cpp")) {
+    } else if (starts_with(filename, "test_") && ends_with(filename, ".cpp")) {
       test_files.push_back(dir_entry.path());
     }
   }
+  cout << "test files found: " << test_files.size() << endl;
 
   // compile src, lib and testutil files
   for (auto file : files) {

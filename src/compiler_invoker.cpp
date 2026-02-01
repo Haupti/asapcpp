@@ -10,7 +10,7 @@ std::string to_build_object_filepath(std::string filename) {
       copy[i] = '_';
     }
   }
-  return "build/" + filename + ".o";
+  return "build/" + copy + ".o";
 }
 
 std::string compile_file_default(asap_config *conf, std::string filename,

@@ -9,7 +9,7 @@ struct auto_pipe {
   bool closed = false;
   FILE *pipe;
   auto_pipe(const char *command) {
-    pipe = popen(command, "rb");
+    pipe = popen(command, "r");
     if (!pipe) {
       panic("failed to open pipe to '" + std::string(command) + "'");
     }
