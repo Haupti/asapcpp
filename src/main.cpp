@@ -2,23 +2,31 @@
 #include "util.hpp"
 #include <vector>
 
+void show_help() {
+  println("Usage: asapc <command> [args...]");
+  println("Commands:\n");
+  println("  new  <name>        - creates a new cpp project");
+  println("  build              - optimized build");
+  println("  run [args]         - default build and run.");
+  println("  test               - runs the tests");
+  println("  include <lib-name> - include dependency via pkg-config");
+  println("  tidy               - runs clang-tidy");
+  println("  help|-h|--help     - shows this");
+}
+
 int main(int args, char **argv) {
   if (args < 2) {
-    println("Usage: asapc <command> [args...]");
-    println("Commands:\n");
-    println("  new  <name>        - creates a new cpp project");
-    println("  build              - optimized build");
-    println("  run [args]         - default build and run.");
-    println("  test               - runs the tests");
-    println("  include <lib-name> - include dependency via pkg-config");
-    println("  tidy               - runs clang-tidy");
+    show_help();
   }
-
   std::string command = argv[1];
   std::vector<std::string> arguments;
   arguments.reserve(args);
   for (int i = 2; i < args; i++) {
     arguments.push_back(argv[i]);
+  }
+  if (args == 1 && (arguments[1] == "--help" || arguments[1] == "-h" ||
+                    arguments[1] == "help")) {
+    show_help();
   }
 
   if (command == "new") {
@@ -32,7 +40,7 @@ int main(int args, char **argv) {
   } else if (command == "include") {
     command_include(arguments);
   } else if (command == "tidy") {
-    fail("not yet implemented");
+    command_tidy(arguments);
   } else {
     fail("unkown command '" + command + "'");
   }

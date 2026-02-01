@@ -13,10 +13,9 @@ static std::string MAIN_FILE_CONTENT =
     "      arguments.push_back(std::string(argv[i]));\n"
     "    }\n"
     "    std::cout << \"Hello with arguments:\\n\";\n"
-    "    for(std::string argument : arguments){\n"
+    "    for(const std::string &argument : arguments){\n"
     "      std::cout << \" - \" << argument << \"\\n\";\n"
     "    }\n"
-    "    std::cout << std::endl;\n"
     "    return 0;\n"
     "}\n";
 

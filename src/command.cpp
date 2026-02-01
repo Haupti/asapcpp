@@ -139,8 +139,8 @@ void command_run(vector<string> args) {
 }
 
 void command_build(std::vector<std::string> args) {
-  if (args.size() != 1) {
-    fail("'include' expects exactly 1 argument");
+  if (args.size() != 0) {
+    fail("'build' expects no arguments");
   }
   asap_conf conf = asap_conf_load();
   cleanup_build_dir();
@@ -157,6 +157,9 @@ void command_build(std::vector<std::string> args) {
   string evaluate_command = "./" + output_file + " " + join(args, " ");
 }
 void command_include(std::vector<std::string> args) {
+  if (args.size() != 1) {
+    fail("'include' expects exactly 1 argument");
+  }
   asap_conf conf = asap_conf_load();
   process_result which_pkg_config = process_run("which pkg-config");
   if (which_pkg_config.status != 0) {
@@ -164,14 +167,14 @@ void command_include(std::vector<std::string> args) {
   }
 
   string lib = args[0];
-  string linker_flags_command = "pkg-cofig --libs " + lib;
+  string linker_flags_command = "pkg-config --libs " + lib;
   process_result linker_flags_result =
       process_run(linker_flags_command.c_str());
   if (linker_flags_result.status != 0) {
     fail("failed to find linker flags for '" + lib + "'");
   }
 
-  string compiler_flags_command = "pkg-cofig --cflags " + lib;
+  string compiler_flags_command = "pkg-config --cflags " + lib;
   process_result compiler_flags_result =
       process_run(compiler_flags_command.c_str());
   if (compiler_flags_result.status != 0) {
@@ -183,4 +186,21 @@ void command_include(std::vector<std::string> args) {
   conf._lib_linker_flags[lib + ".linker.flags"] = linker_flags_result.stdoutput;
 
   asap_conf_write(&conf);
+}
+
+void command_tidy(std::vector<std::string> args) {
+  if (args.size() != 0) {
+    fail("'tidy' expects no arguments");
+  }
+  asap_conf conf = asap_conf_load();
+  process_result which_pkg_config = process_run("which clang-tidy");
+  if (which_pkg_config.status != 0) {
+    fail("'clang-tidy' not found.");
+  }
+
+  vector<string> src_files = find_cpp_files_in({"src"}, true);
+
+  string command = "clang-tidy --checks=\"" + conf.tidy_checks + "\" " +
+                   join(src_files, " ");
+  process_exec(command.c_str());
 }
