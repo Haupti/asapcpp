@@ -9,5 +9,5 @@ struct process_result {
     this->status = status;
   }
 };
-process_result run(const char *command);
-void exec(const char *command);
+process_result process_run(const char *command);
+void process_exec(const char *command);

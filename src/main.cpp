@@ -1,5 +1,5 @@
-#include "util.hpp"
 #include "command.hpp"
+#include "util.hpp"
 #include <vector>
 
 int main(int args, char **argv) {
@@ -20,7 +20,11 @@ int main(int args, char **argv) {
     arguments.push_back(argv[i]);
   }
 
-  if(command == "new"){
+  if (command == "new") {
     command_new(arguments);
+  } else if (command == "test") {
+    command_test(arguments);
+  } else {
+    fail("unkown command '" + command + "'");
   }
 }
