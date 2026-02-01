@@ -31,14 +31,9 @@ std::string compile_file_default(asap_config *conf, std::string filename,
   return object_file_path;
 }
 
-void link_files_default(
-    asap_config *conf, std::string object_files_str,
-    std::string output_filename = "___use_conf_target_name___",
-    bool silent = false) {
+void link_files_default(asap_config *conf, std::string object_files_str,
+                        std::string output_filename, bool silent) {
   assert(conf);
-  if (output_filename == "___use_conf_target_name___") {
-    output_filename = conf->target_name;
-  }
   if (!silent) {
     info("Linking...");
   }

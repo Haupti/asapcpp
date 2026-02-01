@@ -17,7 +17,46 @@ void cleanup_build_dir() {
     filesystem::create_directory("build");
   }
 }
+
+bool has_ccache_and_warn() {
+  process_result which_ccache = process_run("which ccache");
+  if (which_ccache.status == 0) {
+    return true;
+  } else {
+    warn("'ccache' is not installed. This is not required but recommended to "
+         "increase compilation speed");
+    return false;
+  }
+}
+
+vector<string> find_cpp_files_in(vector<string> dir_paths, bool include_main) {
+  vector<string> filepaths;
+  string filename;
+  for (auto dir_path : dir_paths) {
+    for (auto dir_entry : filesystem::recursive_directory_iterator(dir_path)) {
+      filename = dir_entry.path().filename();
+      if (!include_main && filename == "main.cpp") {
+        continue;
+      }
+      if (ends_with(filename, ".cpp")) {
+        filepaths.push_back(dir_entry.path());
+      }
+    }
+  }
+  return filepaths;
+}
+
+string find_object_files_string() {
+  vector<string> object_files;
+  for (auto dir_entry : filesystem::recursive_directory_iterator("build")) {
+    if (ends_with(dir_entry.path(), ".o")) {
+      object_files.push_back(dir_entry.path());
+    }
+  }
+  return join(object_files, " ");
+}
 } // namespace
+
 void command_new(vector<string> args) {
   if (args.size() != 1) {
     fail("'new' expects exactly 1 argument");
@@ -42,34 +81,11 @@ void command_test(vector<string> args) {
   }
   asap_config conf = asap_config_load();
   cleanup_build_dir();
+  bool use_ccache = has_ccache_and_warn();
 
-  // check for ccache
-  bool use_ccache = false;
-  process_result which_ccache = process_run("which ccache");
-  if (which_ccache.status == 0) {
-    use_ccache = true;
-  } else {
-    warn("'ccache' is not installed. This is not required but recommended to "
-         "increase compilation speed");
-  }
-
-  // gather src, lib and testutil files
-  // gather test files
+  // gather src, lib, testutil and test files
+  vector<string> files = find_cpp_files_in({"src", "lib"}, false);
   vector<string> test_files;
-  vector<string> files;
-  for (auto dir_entry : filesystem::recursive_directory_iterator("src")) {
-    string filename = dir_entry.path().filename();
-    if (ends_with(filename, ".cpp") && filename != "main.cpp") {
-      files.push_back(dir_entry.path());
-    }
-  }
-  for (auto dir_entry : filesystem::recursive_directory_iterator("lib")) {
-    string filename = dir_entry.path().filename();
-    if (ends_with(filename, ".cpp")) {
-      files.push_back(dir_entry.path());
-    }
-  }
-
   for (auto dir_entry : filesystem::recursive_directory_iterator("tests")) {
     string filename = dir_entry.path().filename();
     if (starts_with(filename, "testutil_") && ends_with(filename, ".cpp")) {
@@ -85,13 +101,7 @@ void command_test(vector<string> args) {
   }
 
   // gather src, lib and testutil object files
-  vector<string> object_files;
-  for (auto dir_entry : filesystem::recursive_directory_iterator("build")) {
-    if (ends_with(dir_entry.path(), ".o")) {
-      object_files.push_back(dir_entry.path());
-    }
-  }
-  string object_files_string = join(object_files, " ");
+  string object_files_string = find_object_files_string();
 
   // compile, link and run test file + object files
   for (auto test : test_files) {
@@ -104,4 +114,28 @@ void command_test(vector<string> args) {
     string evaluate_command = "./build/testexe";
     process_exec(evaluate_command.c_str());
   }
+}
+
+void command_run(vector<string> args) {
+  asap_config conf = asap_config_load();
+  cleanup_build_dir();
+  bool use_ccache = has_ccache_and_warn();
+
+  vector<string> src_files = find_cpp_files_in({"src", "lib"}, true);
+  for (auto file : src_files) {
+    compile_file_default(&conf, file, use_ccache, false);
+  }
+
+  string object_files_string = find_object_files_string();
+  string output_file = "build/" + conf.target_name;
+  link_files_default(&conf, object_files_string, output_file, false);
+  string evaluate_command = "./" + output_file + " " + join(args, " ");
+
+  if (args.size() > 0) {
+    evaluate_command = "./" + output_file + " " + join(args, " ");
+  } else {
+    evaluate_command = "./" + output_file;
+  }
+  info("Running '" + evaluate_command + "'...");
+  process_exec(evaluate_command.c_str());
 }

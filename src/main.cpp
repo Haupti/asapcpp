@@ -8,7 +8,7 @@ int main(int args, char **argv) {
     println("Commands:\n");
     println("  new  <name>        - creates a new cpp project");
     println("  build              - optimized build");
-    println("  run                - default build and run");
+    println("  run [args]         - default build and run.");
     println("  test               - runs the tests");
     println("  include <lib-name> - include dependency via pkg-config");
   }
@@ -24,6 +24,8 @@ int main(int args, char **argv) {
     command_new(arguments);
   } else if (command == "test") {
     command_test(arguments);
+  } else if (command == "run") {
+    command_run(arguments);
   } else {
     fail("unkown command '" + command + "'");
   }
