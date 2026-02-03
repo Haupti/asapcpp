@@ -1,3 +1,4 @@
+#include "../lib/asap/stopwatch.hpp"
 #include "compiler_invoker.hpp"
 #include "config.hpp"
 #include "constants.hpp"
@@ -14,6 +15,12 @@ void cleanup_build_dir() {
     filesystem::remove_all("build");
   }
   filesystem::create_directories("build/.obj");
+}
+
+void ensure_tests_dir() {
+  if (!filesystem::exists("tests")) {
+    filesystem::create_directory("tests");
+  }
 }
 
 bool has_ccache_and_warn() {
@@ -77,8 +84,10 @@ void command_test(vector<string> args) {
   if (args.size() != 0) {
     fail("'test' expects no arguments");
   }
+  StopWatch sw = StopWatch();
   asap_conf conf = asap_conf_load();
   cleanup_build_dir();
+  ensure_tests_dir();
   bool use_ccache = has_ccache_and_warn();
 
   // gather src, lib, testutil and test files
@@ -107,11 +116,12 @@ void command_test(vector<string> args) {
         compile_file_default(&conf, test, use_ccache, true);
 
     link_files_default(&conf, object_files_string + " " + test_object_file,
-                       "build/testexe", true);
+                       "build/testexe");
 
     string evaluate_command = "./build/testexe";
     process_exec(evaluate_command.c_str());
   }
+  info("Testrun took " + std::to_string(sw.stop_ms()) + "ms");
 }
 
 void command_run(vector<string> args) {
@@ -126,7 +136,7 @@ void command_run(vector<string> args) {
 
   string object_files_string = find_object_files_string();
   string output_file = "build/" + conf.target_name;
-  link_files_default(&conf, object_files_string, output_file, false);
+  link_files_default(&conf, object_files_string, output_file);
   string evaluate_command = "./" + output_file + " " + join(args, " ");
 
   if (args.size() > 0) {
@@ -135,13 +145,16 @@ void command_run(vector<string> args) {
     evaluate_command = "./" + output_file;
   }
   info("Running '" + evaluate_command + "'...");
+  StopWatch sw = StopWatch();
   process_exec(evaluate_command.c_str());
+  info("Run took " + std::to_string(sw.stop_ms()) + "ms");
 }
 
 void command_build(std::vector<std::string> args) {
   if (args.size() != 0) {
     fail("'build' expects no arguments");
   }
+  StopWatch sw = StopWatch();
   asap_conf conf = asap_conf_load();
   cleanup_build_dir();
   bool use_ccache = has_ccache_and_warn();
@@ -153,8 +166,8 @@ void command_build(std::vector<std::string> args) {
 
   string object_files_string = find_object_files_string();
   string output_file = "build/" + conf.target_name;
-  link_files_production(&conf, object_files_string, output_file, false);
-  string evaluate_command = "./" + output_file + " " + join(args, " ");
+  link_files_production(&conf, object_files_string, output_file);
+  info("Build took " + std::to_string(sw.stop_ms()) + "ms");
 }
 void command_include(std::vector<std::string> args) {
   if (args.size() != 1) {
