@@ -5,5 +5,3 @@ compiler.flags.production=-Wall -Wextra -Werror -std=c++17 -O2
 linker.flags.default=-fsanitize=address -fsanitize=undefined
 linker.flags.production=-O2
 tidy.checks=performance-*,bugprone-use-after-move,bugprone-argument-comment,bugprone-dangling-handle,modernize-use-auto,modernize-use-override,modernize-use-using,modernize-make-unique,modernize-make-shared,misc-redundant-expression,readability-redundant-declaration
-ncurses.compiler.flags=-D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 
-ncurses.linker.flags=-lncurses -ltinfo 

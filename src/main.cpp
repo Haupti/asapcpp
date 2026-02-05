@@ -18,6 +18,7 @@ void show_help() {
 int main(int args, char **argv) {
   if (args < 2) {
     show_help();
+    return 0;
   }
   std::string command = argv[1];
   std::vector<std::string> arguments;
@@ -28,6 +29,7 @@ int main(int args, char **argv) {
   if (args == 1 && (arguments[1] == "--help" || arguments[1] == "-h" ||
                     arguments[1] == "help")) {
     show_help();
+    return 0;
   }
 
   if (command == "new") {
