@@ -1,6 +1,9 @@
 #include "util.hpp"
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <string>
+
 void write_file(const std::string &filepath, const std::string &content) {
   std::ofstream f(filepath);
   if (!f.good()) {

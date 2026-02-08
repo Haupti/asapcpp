@@ -1,6 +1,10 @@
+#include "../lib/asap/util.hpp"
 #include "command.hpp"
-#include "util.hpp"
 #include <vector>
+
+namespace {
+static std::string version = "0.1.0";
+}
 
 void show_help() {
   println("Usage: asapc <command> [args...]");
@@ -13,6 +17,7 @@ void show_help() {
   println("  include <lib-name> - include dependency via pkg-config");
   println("  check              - runs clang-tidy on all files in src");
   println("  help|-h|--help     - shows this");
+  println("  --version          - shows version");
 }
 
 int main(int args, char **argv) {
@@ -26,9 +31,13 @@ int main(int args, char **argv) {
   for (int i = 2; i < args; i++) {
     arguments.push_back(argv[i]);
   }
-  if (args == 1 && (arguments[1] == "--help" || arguments[1] == "-h" ||
-                    arguments[1] == "help")) {
+  if (args == 2 &&
+      (command == "--help" || command == "-h" || command == "help")) {
     show_help();
+    return 0;
+  }
+  if (args == 2 && command == "--version") {
+    println(version);
     return 0;
   }
 
@@ -47,6 +56,6 @@ int main(int args, char **argv) {
   } else if (command == "clean") {
     command_clean(arguments);
   } else {
-    fail("unkown command '" + command + "'");
+    fail("unknown command '" + command + "'");
   }
 }

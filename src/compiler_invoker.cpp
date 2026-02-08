@@ -1,7 +1,7 @@
 #include "compiler_invoker.hpp"
 #include "../lib/asap/stopwatch.hpp"
+#include "../lib/asap/util.hpp"
 #include "process.hpp"
-#include "util.hpp"
 #include <cassert>
 
 namespace {
@@ -21,8 +21,8 @@ std::string compile_file(std::string compiler_name, std::string compiler_flags,
   StopWatch sw = StopWatch();
   process_exec(compile_command.c_str());
   if (!silent) {
-    info_update_line("Compiled " + filename + " [" +
-                     std::to_string(sw.stop_ms()) + "ms]");
+    overwrite_println("Compiled " + filename + " [" +
+                      std::to_string(sw.stop_ms()) + "ms]");
   }
   return object_file_path;
 }
