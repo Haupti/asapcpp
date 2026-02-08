@@ -3,7 +3,7 @@
 #include <vector>
 
 namespace {
-static std::string version = "0.1.0";
+static std::string version = "0.1.1";
 }
 
 void show_help() {

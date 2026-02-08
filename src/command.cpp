@@ -1,9 +1,9 @@
 #include "../lib/asap/stopwatch.hpp"
+#include "../lib/asap/util.hpp"
 #include "compiler_invoker.hpp"
 #include "config.hpp"
 #include "constants.hpp"
 #include "process.hpp"
-#include "../lib/asap/util.hpp"
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -76,6 +76,8 @@ void command_new(vector<string> args) {
   write_file(args[0] + "/lib/asap/t.hpp", T_HEADER_FILE_CONTENT);
   write_file(args[0] + "/lib/asap/stopwatch.hpp",
              STOPWATCH_HEADER_FILE_CONTENT);
+  write_file(args[0] + "/lib/asap/util.hpp", UTIL_HEADER_FILE_CONTENT);
+  write_file(args[0] + "/lib/asap/util.cpp", UTIL_IMPL_FILE_CONTENT);
   asap_conf conf;
   asap_conf_write(&conf, args[0] + "/.asap");
 }
